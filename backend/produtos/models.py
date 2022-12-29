@@ -2,6 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
 
+class ProdutoManager(models.Manager):
+    def create(self, *args, **kwargs):
+        user = kwargs.get('user', None)
+        if user and user.is_authenticated and user.is_superuser:
+            return super().create(*args, **kwargs)
+        raise PermissionDenied
 
 class Product(models.Model):
     product_image = models.FileField(
@@ -11,6 +17,9 @@ class Product(models.Model):
         blank=False, null=False, verbose_name='Descrição')
     product_price = models.DecimalField(
         max_digits=9, decimal_places=2, null=False, blank=False)
+    user = models.ForeignKey(User, on_delete = models.CASCADE, blank=False, null=False, verbose_name='Usuário')
+
+    objects = ProdutoManager()
 
     def __str__(self):
         return self.product_name
