@@ -8,6 +8,10 @@ class ProductAdmin(admin.ModelAdmin):
     list_display_links = ('id','product_description',)
     list_per_page = 10
 
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'total_price', 'quantity',)
+    list_display_links = ('id','user',)
+    list_per_page = 10
 
 admin.site.register(Product, ProductAdmin)
-
+admin.site.register(Cart, CartAdmin)

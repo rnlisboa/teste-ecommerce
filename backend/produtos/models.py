@@ -22,6 +22,9 @@ class Product(models.Model):
 class Cart(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name='Usuário')
-    products = models.ManyToManyField(Product, verbose_name='Produtos')
+    products = models.ForeignKey(Product, on_delete= models.CASCADE,blank=False, null=False, verbose_name='Produtos')
     total_price = models.DecimalField(
         max_digits=9, decimal_places=2, verbose_name='Preço total')
+    quantity = models.IntegerField(blank=False,null=False,verbose_name='Quantidade')
+
+    

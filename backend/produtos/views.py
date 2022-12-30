@@ -11,7 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib import auth
 from django.contrib.auth import logout
 from django.core.serializers import serialize
-from django.db.models           import Q
+from django.db.models import Q
 # Create your views here.
 
 # Cadastro e login de usuário
@@ -63,7 +63,8 @@ class UserViewSet(viewsets.ViewSet):
         if not (username and password):
             return Response('Preencha todos os campos.', status=400)
 
-        user = auth.authenticate(self.request, username=username, password=password)
+        user = auth.authenticate(
+            self.request, username=username, password=password)
         print()
         if user is not None:
             auth.login(self.request, user)
@@ -79,7 +80,7 @@ class UserViewSet(viewsets.ViewSet):
 
 
 class ProductViewSet(viewsets.ViewSet):
-     
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
@@ -90,40 +91,35 @@ class ProductViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
     def add_new(self, *args, **kwargs):
 
-        
         if not self.request.user.is_authenticated:
             return Response('Você precisa estar logado para adicionar um novo produto', status=401)
         if not self.request.user.is_superuser:
             return Response('Você não tem permissão para adicionar um novo produto', status=403)
-        
+
         req = self.request.data
-        
+
         product_image = req.get('product_image')
-        product_name = req.get('product_name')
         product_description = req.get('product_description')
         product_price = req.get('product_price')
         product_quantity = req.get('product_quantity')
-        
-        if not (product_name and product_description and product_price and product_image and product_quantity):
+
+        if not (product_description and product_price and product_image and product_quantity):
             return Response('Todos os campos são importantes.', status=400)
 
         try:
             new_product = Product.objects.create(
-                product_image = product_image,
-                product_name = product_name,
-                product_description = product_description,
-                product_price = product_price,
-                product_quantity = product_quantity
+                product_image=product_image,
+                product_description=product_description,
+                product_price=product_price,
+                product_quantity=product_quantity
             )
             new_product.save()
 
-            
         except Exception as e:
             print({e})
-            return Response(r'Erro ao adicionar o produto', status = 400)
-        
+            return Response(r'Erro ao adicionar o produto', status=400)
 
-        return Response('Produto adicionado com sucesso', status= 200)
+        return Response('Produto adicionado com sucesso', status=200)
 
     @action(detail=False, methods=['get'])
     def show_one(self, *args, **kwargs):
@@ -134,78 +130,147 @@ class ProductViewSet(viewsets.ViewSet):
         product_to_show = get_object_or_404(Product, id=value)
         serializer = ProductSerializer(product_to_show)
         return Response(serializer.data, status=200)
-    
+
     @action(detail=False, methods=['get'])
     def show_all(self, request, *args, **kwargs):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
-
     @action(detail=False, methods=['put'])
     def update_one(self, *args, **kwargs):
         products = Product.objects.all()
         value = self.request.query_params.get('value')
         value = int(value)
-        
+
         req = self.request.data
-        
+
         product_to_update = get_object_or_404(Product, id=value)
-        print(product_to_update)
-        print(req)
+
         new_product_image = req.get('product_image')
         new_product_name = req.get('product_name')
         new_product_description = req.get('product_description')
         new_product_price = req.get('product_price')
         new_product_quantity = req.get('product_quantity')
-        print(len(new_product_description))
+
         try:
             if len(new_product_image) > 0:
                 product_to_update.product_image = new_product_image
-            if len(new_product_name) > 0:    
+            if len(new_product_name) > 0:
                 product_to_update.product_name = new_product_name
-            if len(new_product_description) > 0:    
+            if len(new_product_description) > 0:
                 product_to_update.product_description = new_product_description
-            if len(new_product_price) > 0:    
+            if len(new_product_price) > 0:
                 product_to_update.product_price = new_product_price
-            if len(new_product_quantity) > 0:    
+            if len(new_product_quantity) > 0:
                 product_to_update.product_quantity = new_product_quantity
             product_to_update.save()
         except Exception as e:
-            return Response(r'Erro ao atualizar o produto', status = 400)
+            return Response(r'Erro ao atualizar o produto', status=400)
             print(e)
         return Response('Produto atualizado com sucesso.')
 
     @action(detail=False, methods=['delete'])
     def delete_one(self, *args, **kwargs):
-        
-        
+
         products = Product.objects.all()
         value = self.request.query_params.get('value')
         value = int(value)
-        
-        
+
         product_to_delete = get_object_or_404(Product, id=value)
         try:
             product_to_delete.delete()
         except Exception as e:
             print(e)
-            return Response(r'Erro ao deletar o produto.', status = 400)
-            
+            return Response(r'Erro ao deletar o produto.', status=400)
+
         return Response('Produto deletado com sucesso.', status=200)
 
     @action(detail=False, methods=['get'])
     def search(self, *args, **kwargs):
         products = Product.objects.all()
         q = self.request.query_params.get('q')
-        
 
         found_products = products.filter(
-            Q(product_description__icontains= q)
+            Q(product_description__icontains=q)
         )
 
         serializer = ProductSerializer(found_products, many=True)
-        
+
         return Response(serializer.data, status=200)
 
-    
+# Adicionar produtor ao carrinho
+# Remover Produto do carrinho
+# Listar produtos do carrinho
+# Realizar compra
+
+
+class CartViewSet(viewsets.ViewSet):
+
+    queryset = Product.objects.all()
+    serializer_class = CartSerializer
+
+    def list(self, request):
+        products = UserSerializer(request.user).data
+        return Response(products)
+
+    @action(detail=False, methods=['post'])
+    def add_to_cart(self, *args, **kwargs):
+        value = self.request.query_params.get('value')
+        if value:
+            value = int(value)
+        product_to_buy = get_object_or_404(Product, id=value)
+        print(product_to_buy)
+        
+        req = self.request.data
+
+        if not self.request.user.is_authenticated:
+            return Response('Você precisa estar logado para adicionar um novo produto', status=401)
+        if self.request.user.is_superuser:
+            return Response('Somente cliente podem realizar pedidos.', status=403)
+
+        user = self.request.user
+        available_quantity = product_to_buy.product_quantity
+        unity_price = product_to_buy.product_price
+
+        quantity_to_buy = int(req.get('quantity'))
+        unity_price = float(unity_price)
+        
+        if not quantity_to_buy or quantity_to_buy < 1:
+            return Response('Operação inválida.', status=400)
+        if quantity_to_buy > available_quantity:
+            return Response('Quantidade indisponível.', status=400)
+        
+        client_user = user
+        total_price_product = quantity_to_buy * unity_price
+
+        try:
+            product_to_buy.product_quantity = int(product_to_buy.product_quantity) - quantity_to_buy
+            product_to_buy.save()
+            new_buy = Cart.objects.create(
+                user = client_user,
+                products = product_to_buy,
+                total_price = total_price_product,
+                quantity = quantity_to_buy
+            )
+            #new_buy.products.set(product_to_buy)
+            new_buy.save()
+        except Exception as e:
+            print(e)
+            return Response('Não foi possível realizar a compra.', status = 400)
+        
+        
+        return Response('Produto adicionado ao seu carrinho', status=200)
+
+    @action(detail=False, methods=['get'])
+    def my_cart(self, *args, **kwargs):
+        
+        cart = Cart.objects.all()
+        
+        my_cart = cart.filter(
+            user = self.request.user
+        )
+        
+        serializer = CartSerializer(my_cart, many=True)
+        
+        return Response(serializer.data, status=200) 
