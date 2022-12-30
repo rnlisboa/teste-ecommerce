@@ -4,8 +4,8 @@ from .models import Product, Cart
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id','product_name', 'product_description', 'product_price', 'product_quantity',)
-    list_display_links = ('id','product_name',)
+    list_display = ('id', 'product_description', 'product_price', 'product_quantity',)
+    list_display_links = ('id','product_description',)
     list_per_page = 10
 
 

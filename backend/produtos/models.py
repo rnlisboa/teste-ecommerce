@@ -2,12 +2,12 @@ from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
 
-
+def upload_img(instance, filename):
+    return f"{instance}-{filename}"
 
 class Product(models.Model):
     product_image = models.FileField(
-        upload_to=r'produtos/%Y/%m/%d/', verbose_name='Imagem')
-    product_name = models.CharField(max_length=255, blank=False, null=False, verbose_name='Produto')
+        upload_to=upload_img, verbose_name='Imagem')
     product_description = models.TextField(
         blank=False, null=False, verbose_name='Descrição')
     product_price = models.DecimalField(
@@ -16,7 +16,7 @@ class Product(models.Model):
 
 
     def __str__(self):
-        return self.product_name
+        return self.product_description
 
 
 class Cart(models.Model):

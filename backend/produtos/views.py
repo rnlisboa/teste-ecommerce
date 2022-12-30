@@ -201,7 +201,6 @@ class ProductViewSet(viewsets.ViewSet):
         
 
         found_products = products.filter(
-            Q(product_name__icontains= q) |
             Q(product_description__icontains= q)
         )
 

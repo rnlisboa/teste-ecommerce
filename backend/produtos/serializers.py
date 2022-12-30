@@ -11,6 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    product_image = serializers.ImageField(use_url=True)
     class Meta:
         model = Product
         fields = '__all__'
