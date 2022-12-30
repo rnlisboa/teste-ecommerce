@@ -11,8 +11,8 @@ class Product(models.Model):
     product_description = models.TextField(
         blank=False, null=False, verbose_name='Descrição')
     product_price = models.DecimalField(
-        max_digits=9, decimal_places=2, null=False, blank=False)
-    user = models.ForeignKey(User, on_delete = models.CASCADE, blank=False, null=False, verbose_name='Usuário')
+        max_digits=9, decimal_places=2, null=False, blank=False, verbose_name='Preço unitário')
+    product_quantity = models.IntegerField(blank=False,null=False,verbose_name='Quantidade')
 
 
     def __str__(self):
