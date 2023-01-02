@@ -14,6 +14,9 @@ class Product(models.Model):
         max_digits=9, decimal_places=2, null=False, blank=False, verbose_name='Preço unitário')
     product_quantity = models.IntegerField(blank=False,null=False,verbose_name='Quantidade')
 
+    def image_url(self):
+        return self.product_image.url
+
 
     def __str__(self):
         return self.product_description
