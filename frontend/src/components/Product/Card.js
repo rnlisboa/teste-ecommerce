@@ -33,14 +33,17 @@ export default function Card(){
                 </CardInfo>
                 {
                         isAdmin ? (
-                            <Link to={'/produto/detalhes/?=' + product.id}>
+                            <Link to={`/produto/detalhes/${product.id}`}>
                                 <CardButton contextMenu="">Detalhes</CardButton>
                             </Link>
                             
                         
                         
                         ) : (
-                            <CardButton type="submit" contextMenu="">Adicionar ao carrinho</CardButton>
+                            <Link to={`/produto/detalhes/${product.id}`}>
+                                <CardButton type="submit" contextMenu="">Detalhes</CardButton>
+                            </Link>
+                            
                         )
                     }
                 

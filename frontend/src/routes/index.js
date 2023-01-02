@@ -13,8 +13,8 @@ export default function Routes() {
             <MyRoute exact path='/' component={Home} />
             <MyRoute exact path='/cart' component={Carrinho} isClosed/>
             <MyRoute exact path='/dashboard' component={Dashboard} isClosed/>
-            <MyRoute exact path='/login' component={Login}/>
-            <MyRoute exact path='/produto/detalhes/?=:id' component={Detail}/>
+            <MyRoute exact path='/login' component={Login} isClosed={false}/>
+            <MyRoute exact path='/produto/detalhes/:id' component={Detail} isClosed/>
             <MyRoute exact path='*' component={Page404} />
         </Switch>
 

@@ -9,7 +9,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 10
 
 class CartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'total_price', 'quantity',)
+    list_display = ('id', 'user', 'products',)
     list_display_links = ('id','user',)
     list_per_page = 10
 

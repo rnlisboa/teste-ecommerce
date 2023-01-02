@@ -20,11 +20,9 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model=Product
         fields='__all__'
-    def get_image_url(self, obj):
-        return obj.image_url()
+    
 
 class CartSerializer(serializers.ModelSerializer):
-
 
     class Meta:
         model=Cart

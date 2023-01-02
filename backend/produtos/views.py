@@ -13,6 +13,7 @@ from django.core.serializers import serialize
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+
 # Create your views here.
 
 # Cadastro e login de usuário
@@ -38,9 +39,9 @@ class UserViewSet(viewsets.ViewSet):
 
         if not (username and first_name and email and password):
             return Response(f'Preencha todos os campos.', status=HTTP_400_BAD_REQUEST)
-    
+
         serializer = UserSerializer(data=req)
-        if serializer.is_valid():   
+        if serializer.is_valid():
             user = User(
                 username=username,
                 first_name=first_name,
@@ -52,14 +53,12 @@ class UserViewSet(viewsets.ViewSet):
             user.save()
 
             user_serializer = UserSerializer(user, many=True)
-            return Response("Cadastrado com sucesso.", status=HTTP_201_CREATED) 
-        
+            return Response("Cadastrado com sucesso.", status=HTTP_201_CREATED)
+
         return Response({
             "message": "Houveram erros de validação",
             "errors": serializer.errors
         }, status=HTTP_400_BAD_REQUEST)
-
-        
 
     @action(detail=False, methods=['post'])
     def login(self, *args, **kwargs):
@@ -76,17 +75,12 @@ class UserViewSet(viewsets.ViewSet):
         print(user)
         if user is not None:
             auth.login(self.request, user)
-            
+
             return Response({"user": username}, status=HTTP_200_OK)
         else:
             return Response('Usuario ou senha inválido', status=HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'])
-    def logout(self, *args, **kwargs):
-        req = self.request
-        logout(req)
-        return Response('Logout realizado com sucesso', status=HTTP_200_OK)
-
+    
 
 class ProductViewSet(viewsets.ViewSet):
 
@@ -140,68 +134,11 @@ class ProductViewSet(viewsets.ViewSet):
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['put'])
-    def update_one(self, *args, **kwargs):
-        products = Product.objects.all()
-        value = self.request.query_params.get('value')
-        value = int(value)
+    
 
-        req = self.request.data
+    
 
-        product_to_update = get_object_or_404(Product, id=value)
-
-        new_product_image = req.get('product_image')
-        new_product_name = req.get('product_name')
-        new_product_description = req.get('product_description')
-        new_product_price = req.get('product_price')
-        new_product_quantity = req.get('product_quantity')
-
-        try:
-            if len(new_product_image) > 0:
-                product_to_update.product_image = new_product_image
-            if len(new_product_name) > 0:
-                product_to_update.product_name = new_product_name
-            if len(new_product_description) > 0:
-                product_to_update.product_description = new_product_description
-            if len(new_product_price) > 0:
-                product_to_update.product_price = new_product_price
-            if len(new_product_quantity) > 0:
-                product_to_update.product_quantity = new_product_quantity
-            product_to_update.save()
-        
-        except Exception as e:
-            return Response(r'Erro ao atualizar o produto', status=HTTP_400_BAD_REQUEST)
-            print(e)
-        return Response('Produto atualizado com sucesso.', HTTP_200_OK)
-
-    @action(detail=False, methods=['delete'])
-    def delete_one(self, *args, **kwargs):
-
-        products = Product.objects.all()
-        value = self.request.query_params.get('value')
-        value = int(value)
-
-        product_to_delete = get_object_or_404(Product, id=value)
-        try:
-            product_to_delete.delete()
-        except Exception as e:
-            print(e)
-            return Response(r'Erro ao deletar o produto.', status=HTTP_400_BAD_REQUEST)
-
-        return Response(status=200)
-
-    @action(detail=False, methods=['get'])
-    def search(self, *args, **kwargs):
-        products = Product.objects.all()
-        q = self.request.query_params.get('q')
-
-        found_products = products.filter(
-            Q(product_description__icontains=q)
-        )
-
-        serializer = ProductSerializer(found_products, many=True)
-
-        return Response(serializer.data, status=HTTP_200_OK)
+   
 
 
 class CartViewSet(viewsets.ViewSet):
@@ -209,82 +146,54 @@ class CartViewSet(viewsets.ViewSet):
     queryset = Product.objects.all()
     serializer_class = CartSerializer
     permission_class = (IsAuthenticated)
+
     def list(self, request):
         products = UserSerializer(request.user).data
         return Response(products)
 
     @action(detail=False, methods=['post'])
     def add_to_cart(self, *args, **kwargs):
-        
-        value = self.request.query_params.get('value')
-        if value:
-            value = int(value)
-        product_to_buy = get_object_or_404(Product, id=value)
-        print(product_to_buy)
-        
+
         req = self.request.data
 
-        if not self.request.user.is_authenticated:
-            return Response('Você precisa estar logado para adicionar um novo produto', status=401)
-        if self.request.user.is_superuser:
-            return Response('Somente cliente podem realizar pedidos.', status=403)
-
-        user = self.request.user
-        available_quantity = product_to_buy.product_quantity
-        unity_price = product_to_buy.product_price
-
-        quantity_to_buy = int(req.get('quantity'))
-        unity_price = float(unity_price)
-        
-        if not quantity_to_buy or quantity_to_buy < 1:
-            return Response('Operação inválida.', status=HTTP_400_BAD_REQUEST)
-        if quantity_to_buy > available_quantity:
-            return Response('Quantidade indisponível.', status=HTTP_400_BAD_REQUEST)
-        
-        client_user = user
-        total_price_product = quantity_to_buy * unity_price
+        user = req.get('user')
+        value = self.request.query_params.get('value')
+        print(value)
+        product = Product.objects.get(id=value)
+        user_inst = User.objects.get(username=user)
 
         try:
-            product_to_buy.product_quantity = int(product_to_buy.product_quantity) - quantity_to_buy
-            product_to_buy.save()
-            new_buy = Cart.objects.create(
-                user = client_user,
-                products = product_to_buy,
-                total_price = total_price_product,
-                quantity = quantity_to_buy
+
+            new_buy = Cart(
+                user=user_inst,
+                products=product,
+
             )
-            
+
             new_buy.save()
         except Exception as e:
             print(e)
-            return Response('Não foi possível realizar a compra.', status = HTTP_400_BAD_REQUEST)
-        
-        
-        return Response('Produto adicionado ao seu carrinho', status=HTTP_200_OK)
+            return Response('Não foi possível realizar a compra.', status=HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['delete'])
-    def delete_from_cart(self, *args, **kwargs):
-        value = self.request.query_params.get('value')
-        if value:
-            value = int(value)
-        product_to_delete = get_object_or_404(Cart, id=value)
-        try:
-            product_to_delete.delete()
-        except Exception as e:
-            print(e)
-            return Response('Erro ao remover o produto.', status=HTTP_400_BAD_REQUEST)
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response('Produto adicionado ao seu carrinho', status=HTTP_200_OK)
 
     @action(detail=False, methods=['get'])
     def my_cart(self, *args, **kwargs):
+        value = self.request.query_params.get('user')
+
+        user = User.objects.get(username=value)
+        user_id = user.id
         
-        cart = Cart.objects.all()
+        carts = Cart.objects.filter(user_id=user_id)
+
         
-        my_cart = cart.filter(
-            user = self.request.user
-        )
+        produtos = []
+        prod = Product.objects.get(id = 30)
+
+        for i in carts:
+            prod = Product.objects.get(id = i.products.id)
+            produtos.append(prod)
         
-        serializer = CartSerializer(my_cart, many=True)
-        if len(serializer.data) < 1:
-            return Response(serializer.data, status=HTTP_204_NO_CONTENT)
-        return Response(serializer.data, status=HTTP_200_OK) 
+        
+        serializer = ProductSerializer(produtos, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
