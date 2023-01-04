@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import { Link } from "react-router-dom";
 import axios from "../../services/axios";
 import { useSelector } from 'react-redux';
 import {CardContainer, CardImage,CardTitle, CardInfo, CardQuantity, CardPrice, CardButton } from './style'
@@ -9,7 +8,6 @@ export default function Detail(props){
     const user = useSelector(state => state.auth.user);
     
     const [product, setProduct ] = useState([])
-    const isAdmin = useSelector(state => state.auth.isAdmin)
     
     useEffect(()=>{
         async function getData(){
@@ -38,7 +36,7 @@ export default function Detail(props){
         <>
              {
                 <CardContainer key={product.id}>
-                <CardImage src={'http://127.0.0.1:8000' + product.product_image} alt="Titulo da imagem" />
+                <CardImage src={`http://127.0.0.1:8000${product.product_image}`} alt={product.product_description} />
                 <CardTitle>{product.product_description}</CardTitle>
                 <CardInfo>
                     <CardQuantity>Estoque: {product.product_quantity}</CardQuantity>

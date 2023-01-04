@@ -47,41 +47,7 @@ function Dashboard() {
         } catch(err){
             console.log(e)
         }
-        // //
-        // // 
-        // // console.log(image)
-        
-       
-        
-        
-        
-        // //const formData = new FormData(e)
-        // // formData.append('image', image)
-        // // formData.append('descricao', product_description)
-        // // formData.append('preco', product_price)
-        // // formData.append('quantidade', product_quantity)
-        
-        // //console.log(formData)
-        // const imagemURL = URL.createObjectURL(e.target.files[0])
-        // setImage(imagemURL)
 
-        // try{
-        //     // const resp = await axios.post('/api/products/register/', formData, {
-        //     //     headers: {
-        //     //         'Content-type': 'multipart/form-data'
-        //     //         ,Accept: 'application/json',
-        //     //     }
-        //     // })
-        //     const resp = await axios.post('/api/products/register/', {
-        //         product_description, product_price, product_quantity, product_image
-        //     })
-        //     console.log(resp.data)
-        //     toast.success(resp.data)
-        // } catch(e){
-        //     console.log(e.response.data)
- 
-        //     toast.error(e.response.data)
-        // }
         
     }
 

@@ -3,7 +3,6 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from '../../services/axios';
 import * as act from '../../store/modules/auth/actions'
 import history from '../../services/history'
 function Header() {
@@ -13,7 +12,7 @@ function Header() {
     function handleLogout(e) {
         e.preventDefault()
         dispatch(act.loginFailure())
-        
+
         history.push('/')
 
     }
@@ -25,19 +24,11 @@ function Header() {
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                 <Navbar.Collapse id="responsive-navbar-nav">
-                    <Nav className="me-auto">
-
-
-                    </Nav>
                     <Nav>
 
                         <Link to='/'>
                             Home
                         </Link>
-
-
-
-
                         {
                             isLoggedIn && !isAdmin ? (
 
@@ -51,8 +42,6 @@ function Header() {
                             )
                         }
 
-
-
                         {
                             isLoggedIn ? (
                                 <Link to="" onClick={handleLogout}>
@@ -65,7 +54,6 @@ function Header() {
                                 </Link>
                             )
                         }
-
 
                     </Nav>
                 </Navbar.Collapse>
